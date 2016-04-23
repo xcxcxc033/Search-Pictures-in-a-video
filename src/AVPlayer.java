@@ -4,11 +4,12 @@ import java.awt.event.ActionListener;
 import java.awt.image.*;
 import java.io.*;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimerTask;
@@ -85,9 +86,6 @@ public class AVPlayer {
 
 		frame.setSize(500, 450);
 
-		// peter
-		// ButtonLayOut btn = new ButtonLayOut();
-		// btn.initbtnMainLabel(btnMainLabel);
 
 		ButtonLayOut btnLayOut = new ButtonLayOut();
 		btnMainLabel.setPreferredSize(new Dimension(300, 60));
@@ -102,19 +100,7 @@ public class AVPlayer {
 		btnMainLabel.add(btnStart, BorderLayout.CENTER);
 		btnMainLabel.add(btnStop, BorderLayout.EAST);
 		setBtnListener();
-		// btnReplay.
-
-		// peter
-
-		// btn.initButton_pause(button_pause);
-		// btn.initButton_stop(button_stop);
-
-		// java.util.List<BufferedImage> frames = allFrames(args[0]);
-		// for(int i = 0; i!= frames.size(); i++){
-		// BufferedImage img = frames.get(i);
-		// lbIm1.setIcon(new ImageIcon(img));
-		// Thread.sleep(66);
-		// }
+		
 
 	}
 
@@ -128,12 +114,15 @@ public class AVPlayer {
 		
 
 			while (true) {
-				BufferedImage img = playImage.getCurrentImg();
+			//	BufferedImage img = playImage.getCurrentImg();
+				BufferedImage img = playImage.getCurrentImageProcessed();
 				while (img == null) {
-					img = playImage.getCurrentImg();
+					//img = playImage.getCurrentImg();
+					img =  playImage.getCurrentImageProcessed();
 					Thread.sleep(10);
 					// System.out.println(img);
 				}
+				//System.out.println(img);
 				lbIm1.setIcon(new ImageIcon(img));
 				img = null;
 			}
@@ -158,24 +147,51 @@ public class AVPlayer {
 	// peter
 
 	public void playWAV(String filename) {
+		
+		
 		// opens the inputStream
-		FileInputStream inputStream;
+		FileInputStream inputStream1;
+		InputStream inputStream2;
+		byte[] buffer = null;
 		try {
-			inputStream = new FileInputStream(filename);
+			System.out.println("step - 1");
+			inputStream1 = new FileInputStream(filename);
+			//inputStream1 = new FileInputStream("a.wav");
+			
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return;
 		}
-
+		
+		File file = new File(filename);
+		
+	
+		System.out.println("step - 2");
+		calculate_audio audio = new calculate_audio();
+		buffer = audio.calculate_audio(inputStream1,(int)file.length());
+/**		
+		FileInputStream stream = null;
+		try {
+			stream = new FileInputStream("a.wav");
+			//stream = new FileInputStream("a.wav");
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+*/		
+		
+		
 		// initializes the playSound Object
-		playSound = new PlaySound(inputStream);
+		playSound = new PlaySound(buffer,filename);
 		// plays the sound
 		try {
 			playSound.play();
-		} catch (PlayWaveException e) {
+		} catch (PlayWaveException | IOException e) {
 			e.printStackTrace();
 			return;
 		}
+		
 	}
 
 	public void setBtnListener() {
