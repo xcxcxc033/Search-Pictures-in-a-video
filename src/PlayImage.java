@@ -45,7 +45,7 @@ public class PlayImage {
 
 	// peter
 
-	public PlayImage(String filename) {
+	public PlayImage(final String filename) {
 		this.filename = filename;
 		File file = new File(filename);
 		InputStream is;
@@ -70,6 +70,7 @@ public class PlayImage {
 		for (int i = 0; i != locks.length; i++) {
 			locks[i] = new Integer(i);
 		}
+		/**
 		Thread read = new Thread() {
 			public void run() {
 				PlayImage.this.allFrames(filename);
@@ -99,9 +100,9 @@ public class PlayImage {
 				processFinished = true;
 
 			}
-		};
+		}; 
 		read.start();
-
+*/
 	}
 	
 	public double[] getSenceChangeResult(){
@@ -207,6 +208,10 @@ public class PlayImage {
 		
 		return result;
 	}
+	
+//	public BufferedImage readRightImg(){
+//		
+//	}
 
 	public BufferedImage getFirstImage() {
 

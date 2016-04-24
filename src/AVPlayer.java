@@ -20,6 +20,7 @@ public class AVPlayer {
 	JLabel lbIm1;
 	JLabel lbIm2;
 	BufferedImage img;
+	BufferedImage img_right;
 	BufferedImage[] bufferedImgs;
 	PlayImage playImage;
 
@@ -30,12 +31,121 @@ public class AVPlayer {
 
 	// peter
 
+
+	private BufferedImage readRightImg(String imgname, int width, int height){
+		File file = new File(imgname);
+		System.out.println(file.length() + "file");
+		InputStream is;
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		try {
+			is = new FileInputStream(file);
+			long len = file.length();
+			byte[] bytes = new byte[(int)len];
+
+			int offset = 0;
+			int numRead = 0;
+			while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0){
+				offset += numRead;
+			}
+			int ind = 0;
+
+			for(int y = 0; y < height; y++){
+				for(int x = 0; x < width; x++){
+
+					byte r = bytes[ind];
+					byte g = bytes[ind+height*width];
+					byte b = bytes[ind+height*width*2]; 
+					//System.out.println("r: " + r + " g "+ g + " b " + b);
+					//System.out.println("RGB: " + r + " " + g + " " + b);
+					int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+					img.setRGB(x,y,pix);
+					ind++;
+				}
+			}
+			
+			
+			
+		
+			
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		
+		return getSmallImage(img,2,2);
+		
+	}
 	
+	private BufferedImage getSmallImage(BufferedImage img, int w, int h){
+		BufferedImage[] imgs = divideIntoBlock(img, w, h);
+		BufferedImage newImg = new BufferedImage(img.getWidth()/w, img.getHeight()/h, BufferedImage.TYPE_INT_RGB );
+		int ind = 0;
+		for(int x = 0; x < newImg.getWidth(); x++){
+			for(int y = 0; y < newImg.getHeight(); y++){
+				
+				int pix =averageInBlock(imgs[ind]);
+				newImg.setRGB(x,y,pix);
+				ind++;
+			}
+		}
+		return newImg;
+		
+		
+	}
+	
+	private BufferedImage[] divideIntoBlock(BufferedImage img, int w, int h){
+		BufferedImage[] imgs = new BufferedImage[img.getWidth() * img.getHeight() /( w * h)];
+		int currentPos = 0;
+		for(int i = 0; i< img.getWidth(); i+= w){
+			for(int j = 0 ; j < img.getHeight(); j += h){
+//				System.out.println(i);
+//				System.out.println(j);
+//				System.out.println(blockWidth);
+//				System.out.println(img.getWidth());
+				imgs[currentPos] = img.getSubimage(i, j, w, h);
+				currentPos++;
+			}
+		}
+		return imgs;
+	}	
+	
+	public int averageInBlock(BufferedImage block){
+		int[] rgbs = new int[3];
+		int rs = 0;
+		int gs = 0;
+		int bs = 0;
+		for(int i = 0; i < block.getWidth(); i += 1){
+			for(int j = 0; j < block.getHeight(); j+= 1){
+				int rgb = block.getRGB(i, j);
+				int alpha = (rgb >> 24) & 0xFF;
+				int red =   (rgb >> 16) & 0xFF;
+				int green = (rgb >>  8) & 0xFF;
+				int blue =  (rgb      ) & 0xFF;
+				rs += red;
+				gs += green;
+				bs += blue;
+			}
+		}
+		rgbs[0] = rs/(block.getWidth()*block.getHeight());
+		rgbs[1] = gs/(block.getWidth()*block.getHeight());
+		rgbs[2] = bs/(block.getWidth()*block.getHeight());
+		int pix = 0xff000000 | ((rgbs[0] & 0xff) << 16) | ((rgbs[1] & 0xff) << 8) | (rgbs[2] & 0xff);
+		
+		return pix;
+	}
 
 	public void initialize(String[] args) {
 
-		this.playImage = new PlayImage(args[0]);
-
+		this.playImage = new PlayImage(args[0]);		
+		
+		img_right = readRightImg(args[2],1280,960);
+		
+		
 		img = playImage.getFirstImage();
 		// Use labels to display the images
 
@@ -48,6 +158,8 @@ public class AVPlayer {
 		JLabel lbText2 = new JLabel("Audio: " + args[1]);
 		lbText2.setHorizontalAlignment(SwingConstants.LEFT);
 		lbIm1 = new JLabel(new ImageIcon(img));
+		lbIm2 = new JLabel(new ImageIcon(img_right));
+		
 
 		JLabel btnMainLabel = new JLabel();
 
@@ -73,6 +185,11 @@ public class AVPlayer {
 		c.gridx = 0;
 		c.gridy = 2;
 		frame.getContentPane().add(lbIm1, c);
+		
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridx = 1;
+		c.gridy = 2;
+		frame.getContentPane().add(lbIm2, c);
 
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
@@ -83,8 +200,8 @@ public class AVPlayer {
 
 		frame.pack();
 		frame.setVisible(true);
-
-		frame.setSize(500, 450);
+		
+		frame.setSize(1200, 650);
 
 
 		ButtonLayOut btnLayOut = new ButtonLayOut();
