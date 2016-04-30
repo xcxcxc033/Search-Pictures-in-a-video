@@ -3,8 +3,8 @@ import java.awt.image.BufferedImage;
 
 public class EvaluateSimilarityByRescale implements EvaluateSimilarity {
 
-	private int rescaleWidth = 8;
-	private int rescaleHeight = 8;
+	private int rescaleWidth = 16;
+	private int rescaleHeight = 16;
 
 	@Override
 	public double evaluateSimilarityBetweenImage(BufferedImage img1,

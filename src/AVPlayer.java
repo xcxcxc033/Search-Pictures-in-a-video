@@ -231,8 +231,8 @@ public class AVPlayer {
 
 	public void updateFrame() {
 		// System.out.print(100000000);
-		// System.out.printf("%d, ", current);
-		EvaluateSimilarity evaluateSimilarity = new EvaluateSimilarityByRescale();
+//		// System.out.printf("%d, ", current);
+//		EvaluateSimilarity evaluateSimilarity = new EvaluateSimilarityByRescale();
 		System.out.println(new Date());
 
 		try {
@@ -240,34 +240,34 @@ public class AVPlayer {
 		
 
 			while (true) {
-				BufferedImage img = playImage.getCurrentImg();
-//				BufferedImage img = playImage.getCurrentImageProcessed();
+//				BufferedImage img = playImage.getCurrentImg();
+				BufferedImage img = playImage.getCurrentImageProcessed();
 				while (img == null) {
-					img = playImage.getCurrentImg();
-//					img =  playImage.getCurrentImageProcessed();
+//					img = playImage.getCurrentImg();
+					img =  playImage.getCurrentImageProcessed();
 					Thread.sleep(10);
 
 				}
-				double similarity = evaluateSimilarity.evaluateSimilarityBetweenImage(img, rightImg);
-				System.out.printf("%f, %f\n",similarity, maxSimilarity);
-				if(maxSimilarity < similarity){
-					maxSimilarity = similarity;
-					maxOrder = playImage.getCurrent();
-				}
+//				double similarity = evaluateSimilarity.evaluateSimilarityBetweenImage(img, rightImg);
+//				System.out.printf("%f, %f\n",similarity, maxSimilarity);
+//				if(maxSimilarity < similarity){
+//					maxSimilarity = similarity;
+//					maxOrder = playImage.getCurrent();
+//				}
 				
-				//System.out.println(img);
+//				System.out.println(img);
 				lbIm1.setIcon(new ImageIcon(img));
 				img = null;
-				if(playImage.isFinished()){
-					break;
-				}
+//				if(playImage.isFinished()){
+//					break;
+//				}
 			}
-			BufferedImage img = playImage.getImg(maxOrder);
-			
-			System.out.println(maxSimilarity);
-			System.out.println(maxOrder);
-			
-			lbIm1.setIcon(new ImageIcon(img));
+//			BufferedImage img = playImage.getImg(maxOrder);
+//			
+//			System.out.println(maxSimilarity);
+//			System.out.println(maxOrder);
+//			
+//			lbIm1.setIcon(new ImageIcon(img));
 
 			
 

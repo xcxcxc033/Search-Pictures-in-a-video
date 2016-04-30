@@ -24,6 +24,7 @@ public class PlayImage {
 	private String filename;
 	private int motionlessFrame = 0;
 	private double[] evaluateMotionResult;
+	private double[] evaluateSimilarityResult;
 	private boolean processFinished = false;
 	private int[] frameNumberToPlay;
 	private double[] evaluateSenceChangeResult;
@@ -79,8 +80,15 @@ public class PlayImage {
 //				PlayImage.this.evaluateMotionResult = PlayImage.this
 //						.getEvaluateMotionResult();
 //				PlayImage.this.evaluateSenceChangeResult = PlayImage.this.getSenceChangeResult();
+				PlayImage.this.evaluateSimilarityResult = PlayImage.this.getEvaluateSimilarityResult();
+				for (int i = 0; i != PlayImage.this.evaluateSimilarityResult.length; i++) {
+					System.out.printf("%d: %f\n", i, PlayImage.this.evaluateSimilarityResult[i]);
+				}
 //				PlayImage.this.frameNumberToPlay = PlayImage.this
 //						.generateFrameNumberToPlay(200);
+				PlayImage.this.frameNumberToPlay = PlayImage.this.generateFrameNumberToPlay();
+				System.out.println("frameNumberToPlay");
+				System.out.println(PlayImage.this.frameNumberToPlay[0]);
 ////				for (int i = 0; i != PlayImage.this.frameNumberToPlay.length; i++) {
 ////					System.out.println(PlayImage.this.frameNumberToPlay[i]);
 ////				}
@@ -150,12 +158,28 @@ public class PlayImage {
 		System.out.println(current);
 		return temp;
 	}
+	
+	public int[] generateFrameNumberToPlay() {
+		double[] evaluateValue = getEvaluateValue();
+		int[] temp = new int[bufferedImgs.length];
+		int current = 0;
+		double max = -1000;
+		int order = 0;
+		for (int i = 0; i != evaluateValue.length; i++) {
+			if (evaluateValue[i] > max) {
+				max = evaluateValue[i];
+				order = i;
+			}
+		}
+		temp[0] = order;
+		System.out.println(current);
+		return temp;
+	}
 
 	public double[] getEvaluateValue() {
 		double[] result = new double[bufferedImgs.length];
 		for(int i = 0; i != result.length; i++){
-			result[i] = evaluateMotionResult[i] + evaluateSenceChangeResult[i];
-//			System.out.printf("%f, %f, %d\n", evaluateMotionResult[i], evaluateSenceChangeResult[i], i);
+			result[i] = evaluateSimilarityResult[i];
 		}
 		return result;
 	}
@@ -167,6 +191,11 @@ public class PlayImage {
 		}
 		synchronized (currentLock) {
 			if(current >= frameNumberToPlay.length){
+				return null;
+			}
+//			System.out.println(current);
+//			System.out.println(frameNumberToPlay[current]);
+			if(current != 0 && frameNumberToPlay[current] == 0){
 				return null;
 			}
 			if (frameNumberToPlay[current] >= bufferedImgs.length) {
@@ -188,6 +217,18 @@ public class PlayImage {
 		}
 	}
 
+	public double[] getEvaluateSimilarityResult(){
+		EvaluateSimilarity evaluateSimilarity = new EvaluateSimilarityByRescale();
+		double[] result = new double[bufferedImgs.length];
+		result[0] = 0;
+		for (int i = 0; i < bufferedImgs.length; i++) {
+			result[i] = evaluateSimilarity.evaluateSimilarityBetweenImage(
+					bufferedImgs[i], compareImage);
+		}
+		
+		
+		return result;
+	}
 	public double[] getEvaluateMotionResult() {
 		// EvaluateMotion evaluateMotion = new EvaluateMotionByFramePredict(15,
 		// 15, 5, 5);
