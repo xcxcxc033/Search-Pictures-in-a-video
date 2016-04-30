@@ -42,6 +42,8 @@ public class EvaluateSimilarityByColor implements EvaluateSimilarity {
               for(int p = 0; p < histogram[i][j].length; p++){
               	senceDiff += Math.abs(histogram[i][j][p] - Indexhistogram[i][j][p]);
               }	
+		
+		System.out.println(senceDiff);
 		return senceDiff;
 	}
 

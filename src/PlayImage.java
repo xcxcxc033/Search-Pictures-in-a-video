@@ -25,6 +25,8 @@ public class PlayImage {
 	private int motionlessFrame = 0;
 	private double[] evaluateMotionResult;
 	private double[] evaluateSimilarityResult;
+	private double[] evaluateSimilarityByColorResult;
+	private int diffByColorThreshold = 100000;
 	private boolean processFinished = false;
 	private int[] frameNumberToPlay;
 	private double[] evaluateSenceChangeResult;
@@ -84,6 +86,8 @@ public class PlayImage {
 				for (int i = 0; i != PlayImage.this.evaluateSimilarityResult.length; i++) {
 					System.out.printf("%d: %f\n", i, PlayImage.this.evaluateSimilarityResult[i]);
 				}
+				int maxOrder = PlayImage.this.findMaxOrder(PlayImage.this.evaluateSimilarityResult);
+				PlayImage.this.evaluateSimilarityByColorResult  = PlayImage.this.getEvaluateSimilarityByColorResult(maxOrder);
 //				PlayImage.this.frameNumberToPlay = PlayImage.this
 //						.generateFrameNumberToPlay(200);
 				PlayImage.this.frameNumberToPlay = PlayImage.this.generateFrameNumberToPlay();
@@ -114,6 +118,27 @@ public class PlayImage {
 		}; 
 		read.start();
 
+	}
+	
+	public double findMax(double[] value){
+		double max = value[0];
+		for(int i = 0; i!= value.length; i++){
+			if(max < value[i]){
+				max = value[i];
+			}
+		}
+		return max;
+	}
+	public int findMaxOrder(double[] value){
+		double max = value[0];
+		int order = 0;
+		for(int i = 0; i!= value.length; i++){
+			if(max < value[i]){
+				max = value[i];
+				order = i;
+			}
+		}
+		return order;
 	}
 	
 	public int getCurrent(){
@@ -171,8 +196,31 @@ public class PlayImage {
 				order = i;
 			}
 		}
-		temp[0] = order;
-		System.out.println(current);
+		
+		int start = order;
+		while(start > 1){
+			if(evaluateSimilarityByColorResult[start] > diffByColorThreshold){
+				break;
+			}
+			else{
+				start-=1;
+			}
+		}
+		int end = order+1;
+		while(end < evaluateValue.length){
+			if(evaluateSimilarityByColorResult[end-1] > diffByColorThreshold){
+				break;
+			}
+			else{
+				end+=1;
+			}
+		}
+		for(int i = 0; i != end-start; i++){
+			temp[i] = i+start;
+		}
+//		System.out.println(current);
+		System.out.printf("Start: %d", start);
+		System.out.printf("End: %d", end);
 		return temp;
 	}
 
@@ -217,6 +265,18 @@ public class PlayImage {
 		}
 	}
 
+	public double[] getEvaluateSimilarityByColorResult(int order){
+		EvaluateSimilarity evaluateSimilarity = new EvaluateSimilarityByColor();
+		double[] result = new double[bufferedImgs.length];
+		result[0] = 0;
+		System.out.println("Color");
+		for (int i = 0; i < bufferedImgs.length; i++) {
+			result[i] = evaluateSimilarity.evaluateSimilarityBetweenImage(
+					bufferedImgs[i], bufferedImgs[order]);
+			System.out.printf("%d: %f\n", i, result[i]);
+		}
+		return result;
+	}
 	public double[] getEvaluateSimilarityResult(){
 		EvaluateSimilarity evaluateSimilarity = new EvaluateSimilarityByRescale();
 		double[] result = new double[bufferedImgs.length];
