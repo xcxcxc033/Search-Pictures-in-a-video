@@ -42,10 +42,12 @@ public class PlayImage {
 	public int sumIndex = 0;
 	public int[] senceChangeFrame;
 	public int senceChangeIndex = 0;
-
+	private boolean finished = false;
+	private BufferedImage compareImage;
 	// peter
 
-	public PlayImage(final String filename) {
+	public PlayImage(final String filename, BufferedImage compareImage) {
+		this.compareImage = compareImage;
 		this.filename = filename;
 		File file = new File(filename);
 		InputStream is;
@@ -70,40 +72,48 @@ public class PlayImage {
 		for (int i = 0; i != locks.length; i++) {
 			locks[i] = new Integer(i);
 		}
-		/**
+		
 		Thread read = new Thread() {
 			public void run() {
 				PlayImage.this.allFrames(filename);
-				PlayImage.this.evaluateMotionResult = PlayImage.this
-						.getEvaluateMotionResult();
-				PlayImage.this.evaluateSenceChangeResult = PlayImage.this.getSenceChangeResult();
-				PlayImage.this.frameNumberToPlay = PlayImage.this
-						.generateFrameNumberToPlay(200);
-//				for (int i = 0; i != PlayImage.this.frameNumberToPlay.length; i++) {
-//					System.out.println(PlayImage.this.frameNumberToPlay[i]);
+//				PlayImage.this.evaluateMotionResult = PlayImage.this
+//						.getEvaluateMotionResult();
+//				PlayImage.this.evaluateSenceChangeResult = PlayImage.this.getSenceChangeResult();
+//				PlayImage.this.frameNumberToPlay = PlayImage.this
+//						.generateFrameNumberToPlay(200);
+////				for (int i = 0; i != PlayImage.this.frameNumberToPlay.length; i++) {
+////					System.out.println(PlayImage.this.frameNumberToPlay[i]);
+////				}
+//				CommunicateVariables communicateVariables = CommunicateVariables.getSingular();
+//				communicateVariables.imageIndexInput(frameNumberToPlay);
+//				while(! communicateVariables.finished()){
+//					try {
+//						Thread.sleep(10);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
 //				}
-				CommunicateVariables communicateVariables = CommunicateVariables.getSingular();
-				communicateVariables.imageIndexInput(frameNumberToPlay);
-				while(! communicateVariables.finished()){
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				
-				frameNumberToPlay = communicateVariables.getIndex();
-//				for (int i = 0; i != PlayImage.this.frameNumberToPlay.length; i++) {
-//					System.out.println(PlayImage.this.frameNumberToPlay[i]);
-//				}
+//				
+//				frameNumberToPlay = communicateVariables.getIndex();
+////				for (int i = 0; i != PlayImage.this.frameNumberToPlay.length; i++) {
+////					System.out.println(PlayImage.this.frameNumberToPlay[i]);
+////				}
 				processFinished = true;
+				System.out.println(processFinished);
 
 			}
 		}; 
 		read.start();
-*/
+
 	}
+	
+	public int getCurrent(){
+		synchronized (currentLock) {
+			return this.current;
+		}
+	}
+	
 	
 	public double[] getSenceChangeResult(){
 		double[] result = new double[bufferedImgs.length];
@@ -285,7 +295,11 @@ public class PlayImage {
 			e.printStackTrace();
 		}
 	}
+	public boolean isFinished(){
+		return finished;
+	}
 
+	
 	public void allFrames(InputStream is) {
 
 		try {
@@ -435,13 +449,25 @@ public class PlayImage {
 
 	}
 
+	public BufferedImage getImg(int order) {
+		if (order >= bufferedImgs.length) {
+			return null;
+		}
+		synchronized (locks[order]) {
+			return bufferedImgs[order];
+		}
+	}
+
 	public BufferedImage getCurrentImg() {
 		synchronized (currentLock) {
+			
 			if (current >= bufferedImgs.length) {
+				this.finished = true;
 				return null;
 			}
 			synchronized (locks[current]) {
 				if (last == current) {
+					
 					return null;
 				} else {
 					last = current;
@@ -480,13 +506,15 @@ public class PlayImage {
 			public void run() {
 
 				synchronized (PlayImage.this.currentLock) {
+//					System.out.printf("%d: PlayImage\n",PlayImage.this.current);
 					PlayImage.this.current++;
+
 
 				}
 
 			}
 		};
-
+		System.out.println("start");
 		updateFrameTimer.scheduleAtFixedRate(updateFrameTimerTask, 0,
 				PlayImage.this.intervalTime);
 

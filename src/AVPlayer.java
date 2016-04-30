@@ -23,6 +23,9 @@ public class AVPlayer {
 	BufferedImage img_right;
 	BufferedImage[] bufferedImgs;
 	PlayImage playImage;
+	BufferedImage rightImg;
+	private double maxSimilarity = -100;
+	private int maxOrder;
 
 	// peter
 	JButton btnReplay;
@@ -76,8 +79,12 @@ public class AVPlayer {
 			e.printStackTrace();
 		}
 
-		
-		return getSmallImage(img,2,2);
+		Image  postImg = img.getScaledInstance(img.getWidth()/2, img.getHeight()/2, Image.SCALE_DEFAULT);
+		BufferedImage buffered = new BufferedImage(img.getWidth()/2, img.getHeight()/2, BufferedImage.TYPE_INT_RGB);
+		buffered.getGraphics().drawImage(postImg, 0, 0 , null);
+		this.rightImg = buffered;
+		return buffered;
+//		return getSmallImage(img,2,2);
 		
 	}
 	
@@ -141,9 +148,10 @@ public class AVPlayer {
 
 	public void initialize(String[] args) {
 
-		this.playImage = new PlayImage(args[0]);		
+				
 		
-		img_right = readRightImg(args[2],1280,960);
+		img_right = readRightImg(args[2],1280,720);
+		this.playImage = new PlayImage(args[0], img_right);
 		
 		
 		img = playImage.getFirstImage();
@@ -224,6 +232,7 @@ public class AVPlayer {
 	public void updateFrame() {
 		// System.out.print(100000000);
 		// System.out.printf("%d, ", current);
+		EvaluateSimilarity evaluateSimilarity = new EvaluateSimilarityByRescale();
 		System.out.println(new Date());
 
 		try {
@@ -231,24 +240,36 @@ public class AVPlayer {
 		
 
 			while (true) {
-			//	BufferedImage img = playImage.getCurrentImg();
-				BufferedImage img = playImage.getCurrentImageProcessed();
+				BufferedImage img = playImage.getCurrentImg();
+//				BufferedImage img = playImage.getCurrentImageProcessed();
 				while (img == null) {
-					//img = playImage.getCurrentImg();
-					img =  playImage.getCurrentImageProcessed();
+					img = playImage.getCurrentImg();
+//					img =  playImage.getCurrentImageProcessed();
 					Thread.sleep(10);
-					// System.out.println(img);
+
 				}
+				double similarity = evaluateSimilarity.evaluateSimilarityBetweenImage(img, rightImg);
+				System.out.printf("%f, %f\n",similarity, maxSimilarity);
+				if(maxSimilarity < similarity){
+					maxSimilarity = similarity;
+					maxOrder = playImage.getCurrent();
+				}
+				
 				//System.out.println(img);
 				lbIm1.setIcon(new ImageIcon(img));
 				img = null;
+				if(playImage.isFinished()){
+					break;
+				}
 			}
+			BufferedImage img = playImage.getImg(maxOrder);
+			
+			System.out.println(maxSimilarity);
+			System.out.println(maxOrder);
+			
+			lbIm1.setIcon(new ImageIcon(img));
 
-			// System.out.println(i);
-			// Thread.sleep(intervalTime);
-			// synchronized (currentLock) {
-			// current++;
-			// }
+			
 
 		}
 
@@ -298,9 +319,10 @@ public class AVPlayer {
 		}
 */		
 		
-		
+//		System.out.println("test");
 		// initializes the playSound Object
 		playSound = new PlaySound(buffer,filename);
+//		System.out.println(playSound);
 		// plays the sound
 		try {
 			playSound.play();
@@ -323,13 +345,13 @@ public class AVPlayer {
 					AVPlayer.this.playImage.startOrContinue();
 					btnStart.setIcon(ButtonLayOut.ChangeImgSize(new ImageIcon(
 							"pause.png"), 60, 60));
-					playSound.startOrResume();
+//					playSound.startOrResume();
 					is_pause = true;
 				} else {
 					AVPlayer.this.playImage.pause();
 					btnStart.setIcon(ButtonLayOut.ChangeImgSize(new ImageIcon(
 							"start.png"), 60, 60));
-					playSound.Stop();
+//					playSound.Stop();
 					is_pause = false;
 				}
 
