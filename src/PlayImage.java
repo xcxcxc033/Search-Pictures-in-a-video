@@ -26,7 +26,7 @@ public class PlayImage {
 	private double[] evaluateMotionResult;
 	private double[] evaluateSimilarityResult;
 	private double[] evaluateSimilarityByColorResult;
-	private int diffByColorThreshold = 100000;
+	private int diffByColorThreshold = 50000;
 	private boolean processFinished = false;
 	private int[] frameNumberToPlay;
 	private double[] evaluateSenceChangeResult;
@@ -96,17 +96,17 @@ public class PlayImage {
 ////				for (int i = 0; i != PlayImage.this.frameNumberToPlay.length; i++) {
 ////					System.out.println(PlayImage.this.frameNumberToPlay[i]);
 ////				}
-//				CommunicateVariables communicateVariables = CommunicateVariables.getSingular();
-//				communicateVariables.imageIndexInput(frameNumberToPlay);
-//				while(! communicateVariables.finished()){
-//					try {
-//						Thread.sleep(10);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//				
+				CommunicateVariables communicateVariables = CommunicateVariables.getSingular();
+				communicateVariables.imageIndexInput(frameNumberToPlay);
+				while(! communicateVariables.finished()){
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
 //				frameNumberToPlay = communicateVariables.getIndex();
 ////				for (int i = 0; i != PlayImage.this.frameNumberToPlay.length; i++) {
 ////					System.out.println(PlayImage.this.frameNumberToPlay[i]);
