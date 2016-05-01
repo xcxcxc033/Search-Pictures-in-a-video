@@ -26,7 +26,7 @@ public class PlayImage {
 	private double[] evaluateMotionResult;
 	private double[] evaluateSimilarityResult;
 	private double[] evaluateSimilarityByColorResult;
-	private int diffByColorThreshold = 50000;
+	private int diffByColorThreshold = 80000;
 	private boolean processFinished = false;
 	private int[] frameNumberToPlay;
 	private double[] evaluateSenceChangeResult;
@@ -201,6 +201,8 @@ public class PlayImage {
 		while(start > 1){
 			if(evaluateSimilarityByColorResult[start] > diffByColorThreshold){
 				break;
+			}else if(order - start > 150){
+				break;
 			}
 			else{
 				start-=1;
@@ -209,6 +211,9 @@ public class PlayImage {
 		int end = order+1;
 		while(end < evaluateValue.length){
 			if(evaluateSimilarityByColorResult[end-1] > diffByColorThreshold){
+				break;
+			}
+			else if(end - order > 150){
 				break;
 			}
 			else{
